@@ -1,0 +1,19 @@
+{
+  "name": "agentflow-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"@agentflow/*\" dev",
+    "build": "pnpm --filter \"@agentflow/*\" build",
+    "lint": "pnpm --filter \"@agentflow/*\" lint",
+    "test": "pnpm --filter \"@agentflow/*\" test",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.2",
+    "prettier": "^3.5.3"
+  },
+  "packageManager": "pnpm@12.9.1"
+}
