@@ -11,125 +11,26 @@
 
 ---
 
-## 🏗️ Architecture Overview
+## 🎯 Workflow Automation Pipeline
 
-AgentFlow is engineered as a production-grade enterprise B2B SaaS platform isolating deterministic business state machines from AI reasoning:
-
-```text
-                         ┌───────────────────────────────┐
-                         │       Next.js 15 Web UI       │
-                         │  Builder / Approvals / Shell  │
-                         │    (Ctrl+K Command Palette)   │
-                         └──────────────┬────────────────┘
-                                        │
-                         HTTPS / x-request-id Tracing
-                                        │
-                         ┌──────────────▼────────────────┐
-                         │        NestJS REST API        │
-                         │  Auth / 5-Tier RBAC / Tenant  │
-                         │   LoggingTraceInterceptor     │
-                         └──────────────┬────────────────┘
-                                        │
-               ┌────────────────────────┼────────────────────────┐
-               │                        │                        │
-        ┌──────▼──────┐          ┌──────▼──────┐          ┌──────▼──────┐
-        │ PostgreSQL  │          │    Redis    │          │ Audit Logs  │
-        │  pgvector   │          │ Cache/Queue │          │  Timeline   │
-        └─────────────┘          └──────┬──────┘          └─────────────┘
-                                        │
-                                Asynchronous Event
-                                        │
-                         ┌──────────────▼────────────────┐
-                         │       FastAPI AI Service      │
-                         │ (Triage / Research / Response)│
-                         │   Policy Gate / Sandboxed     │
-                         │       Tool Registry           │
-                         └───────────────────────────────┘
-```
+<p align="center">
+  <img src="docs/images/workflow-diagram.jpg" alt="AgentFlow Multi-Agent Workflow Pipeline" width="100%" />
+</p>
 
 ---
 
-## 🎯 Flagship Workflow: Customer Support Escalations
+## 🚀 Key Features
 
-```text
-Customer Inquiry / Webhook
-          ↓
-┌───────────────────────┐
-│     Triage Agent      │  Assess Urgency & Category (Technical, Billing, Policy)
-└──────────┬────────────┘
-          ↓
-┌───────────────────────┐
-│    Research Agent     │  Grounded context retrieval against verified knowledge
-└──────────┬────────────┘
-          ↓
-┌───────────────────────┐
-│    Response Agent     │  Draft empathetic resolution & calculate risk score
-└──────────┬────────────┘
-          ↓
-┌───────────────────────┐
-│   Risk Policy Gate    │
-└──────────┬────────────┘
-           │
-     ┌─────┴─────────────────────────┐
-     │                               │
-[LOW RISK]                      [HIGH RISK]
-     │                               │
-Auto-Execute Tool         WAITING_FOR_APPROVAL
-     │                               │
-     │                    Manager Reviews & Decides
-     │                               │
-     │                    [APPROVED] │ [REJECTED]
-     │                               ▼
-     └─────────────┬─────────────────┘
-                   │
-         Sandboxed Tool Execution
-       (`email_send` / `db_query`)
-                   │
-                   ▼
-       Immutable Audit Trail Log
-```
-
----
-
-## 🚀 Key Features by Phase
-
-### Phase 1: Foundation & SaaS Core
-- **Multi-Tenant Data Isolation:** Tenant boundary enforced at the database query layer via Organization IDs.
-- **Server-Side RBAC (5 Tiers):** `OWNER` > `ADMIN` > `MANAGER` > `ANALYST` > `VIEWER` with guard decorators and zero client-side trust.
-- **Dual-Token Authentication:** Secure JWT authentication with HTTP-only cookies and Bearer token compatibility.
-- **Calm B2B Design System:** Built with Next.js 15 App Router, Tailwind CSS, Lucide icons, dynamic theme switching, and accessible empty/loading states.
-- **Database & Cache Cluster:** PostgreSQL 16 (`pgvector`) and Redis 7 containerized via Docker Compose.
-
-### Phase 2: Autonomous Agents & Workflow Engine
-- **FastAPI AI Service (`apps/ai-service` on port 8000):** Python 3.12 microservice with Pydantic structured schemas.
-- **Specialized Multi-Agent Pipeline:**
-  - `TriageAgent`: Inquiry classification, priority assignment, confidence scoring.
-  - `ResearchAgent`: Fact grounding, SLA verification, policy compliance check.
-  - `ResponseAgent`: Structured draft generation, tone calibration, risk level scoring.
-- **Deterministic Risk Policy Gate:** Automatically halts high-risk actions (refunds > $100, sensitive escalations) at `WAITING_FOR_APPROVAL`.
-- **Human Approval Inbox:** Interactive review UI at `/approvals` with side-by-side agent traces, parameters, and one-click authorization.
-- **Visual Graph & Live Pipeline Runner:** Interactive pipeline visualizer on `/workflows/[id]` displaying real-time step traces, latency metrics, and execution history.
-
-### Phase 3: Controlled Tools & Security Hardening
-- **Sandboxed Tool Registry:**
-  - `email_send`: High-risk transactional delivery tool requiring manager sign-off.
-  - `db_query`: Internal query tool with table allowlists and mutation escalation.
-  - `search_knowledge`: Low-risk grounded knowledge retrieval.
-  - `http_api`: External webhook integration with SSRF security perimeter.
-- **SSRF Defense Architecture:** Hardened destination resolver strictly blocking loopbacks (`127.0.0.1`), private RFC 1918 subnets, and cloud instance metadata (`169.254.169.254`).
-- **Prompt Injection Defense:** Perimeter input scanner intercepting adversarial system prompt overrides and jailbreak attempts.
-- **Approval Resumption Engine:** Approving a run dispatches the sandboxed tool, marks status `COMPLETED`, and appends an immutable audit event.
-
-### Phase 4: Production Polish, Observability & DevOps
-- **Distributed Request Tracing:** End-to-end `x-request-id` propagation across web UI, NestJS API, and FastAPI AI service with latency logs.
-- **Command Palette (`Ctrl+K` / `Cmd+K`):** Global quick navigation, action shortcuts, and theme switcher.
-- **Production Dockerization:** Multi-stage Dockerfiles (`infrastructure/docker/`) and `docker-compose.prod.yml` ready for deployment.
-- **CI/CD Pipeline:** GitHub Actions workflow (`.github/workflows/ci.yml`) automating linting, Jest tests, Pytest suites, security hardening tests, and E2E validation.
-- **Portfolio Documentation Suite:** Comprehensive enterprise documentation in [`docs/`](docs/):
-  - [Architecture Specification](docs/architecture.md)
-  - [Threat Model & Security Hardening](docs/threat-model.md)
-  - [API Reference](docs/api.md)
-  - [AI Evaluation Benchmark](docs/ai-evaluation.md)
+- **Multi-Tenant Isolation & 5-Tier RBAC:** Strict tenant data boundaries enforced at database level with `OWNER`, `ADMIN`, `MANAGER`, `ANALYST`, and `VIEWER` roles.
+- **Dual-Token Authentication & Audit Logging:** JWT authentication with HTTP-only cookies and comprehensive, immutable audit trails.
+- **Specialized Multi-Agent Pipeline:** Autonomous `TriageAgent`, `ResearchAgent`, and `ResponseAgent` with Pydantic structured schemas and confidence scoring.
+- **Deterministic Policy Approval Gates:** Automatic halting of sensitive or high-risk actions (e.g. refunds > $100) at human review gates (`WAITING_FOR_APPROVAL`).
+- **Interactive Approval Inbox & Visual Graph:** Real-time run inspector on `/workflows/[id]` and review inbox on `/approvals` with one-click decision resumption.
+- **Sandboxed Tool Registry:** Controlled execution for `email_send`, `db_query`, `search_knowledge`, and `http_api` with strict schema validation and timeout controls.
+- **SSRF & Prompt Injection Security:** Perimeter validation blocking private IP ranges, cloud metadata endpoints (`169.254.169.254`), and adversarial instruction injection.
+- **Distributed Request Tracing & Observability:** End-to-end `x-request-id` propagation with execution latency logging across web, API, and AI services.
+- **Command Palette & Calm B2B UI:** Quick navigation via `Ctrl+K` / `Cmd+K`, theme toggle (light/dark), and high-density, calm UX built with Next.js 15 and Tailwind CSS.
+- **Containerization & CI/CD:** Multi-stage Dockerfiles, production compose, and GitHub Actions CI workflow.
 
 ---
 
@@ -143,12 +44,6 @@ Auto-Execute Tool         WAITING_FOR_APPROVAL
 | **SSRF Defense** | Block all private/meta IPs | **4/4 targets blocked** (100%) | `tests/security/phase3-security.mjs` |
 | **Prompt Injection Filter** | Perimeter rejection | **100% intercepted** | `tests/security/phase3-security.mjs` |
 | **Automated Test Pass Rate** | 100% | **23/23 tests passing** | Jest + Pytest + E2E Suites |
-
----
-
-## 💼 Resume Bullet
-
-> **Built AgentFlow, a multi-tenant AI workflow automation platform using Next.js, NestJS, FastAPI, PostgreSQL, Redis and LLM tool calling, implementing RBAC, human approval gates, secure tool execution, asynchronous workflows, audit logging and automated security/E2E testing.**
 
 ---
 
