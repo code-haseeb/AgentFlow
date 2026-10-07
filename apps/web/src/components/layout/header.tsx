@@ -13,6 +13,14 @@ export function Header() {
     <header className="h-14 border-b border-border bg-surface px-4 flex items-center justify-between shrink-0">
       <div className="flex items-center gap-4">
         <OrgSwitcher />
+
+        <button
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+          className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border bg-background text-xs text-text-secondary hover:text-text-primary transition-colors"
+        >
+          <span className="text-[11px]">Search & Commands...</span>
+          <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-surface border border-border">Ctrl K</kbd>
+        </button>
       </div>
 
       <div className="flex items-center gap-3">

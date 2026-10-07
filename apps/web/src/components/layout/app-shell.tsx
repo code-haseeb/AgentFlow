@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../context/auth-context';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
+import { CommandPalette } from './command-palette';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -41,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Header />
         <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }

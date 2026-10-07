@@ -1,6 +1,8 @@
+import time
+import uuid
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .schemas import ExecutePipelineRequest, ExecutePipelineResponse
@@ -13,12 +15,23 @@ app = FastAPI(
     version="0.1.0",
 )
 
+@app.middleware("http")
+async def add_trace_and_timing(request: Request, call_next):
+    request_id = request.headers.get("x-request-id", str(uuid.uuid4()))
+    start_time = time.time()
+    response = await call_next(request)
+    duration_ms = round((time.time() - start_time) * 1000, 2)
+    response.headers["x-request-id"] = request_id
+    response.headers["x-response-time-ms"] = str(duration_ms)
+    return response
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["x-request-id", "x-response-time-ms"],
 )
 
 orchestrator = WorkflowOrchestrator()

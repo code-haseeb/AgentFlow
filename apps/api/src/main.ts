@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { LoggingTraceInterceptor } from './common/interceptors/logging-trace.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,8 +21,11 @@ async function bootstrap() {
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-organization-id'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-organization-id', 'x-request-id'],
+    exposedHeaders: ['x-request-id'],
   });
+
+  app.useGlobalInterceptors(new LoggingTraceInterceptor());
 
   app.useGlobalPipes(
     new ValidationPipe({
