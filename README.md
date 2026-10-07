@@ -58,6 +58,17 @@ AgentFlow is built as a production-grade enterprise B2B SaaS platform:
 - **Human Approval Inbox:** Interactive review UI on `/approvals` where authorized reviewers can inspect exact agent parameters and approve/reject executions.
 - **Visual Graph & Live Execution:** Interactive pipeline graph on `/workflows/[id]` with real-time step traces, latency metrics, and run history.
 
+### Phase 3: Tools + Approvals + Security Hardening
+- **Controlled Tool Execution Layer:** Sandboxed tools with strictly enforced Pydantic schemas, permissions, and timeout controls:
+  - `email_send`: High-risk transactional communication tool requiring manager approval.
+  - `db_query`: Internal database query tool with table allowlists and mutation risk escalation.
+  - `search_knowledge`: Low-risk grounded knowledge base retrieval.
+  - `http_api`: Third-party integration tool with strict SSRF defense.
+- **SSRF Defense Architecture:** Validates destinations to block internal hostnames, loopbacks (`127.0.0.1`), RFC 1918 private subnets, and cloud instance metadata services (`169.254.169.254`).
+- **Prompt Injection Defense:** Scans arguments and prompts against adversarial injection heuristics (e.g. instruction overrides, jailbreak tokens) to halt attacks at the perimeter.
+- **Human Decision Resumption:** Approving an action in the approval inbox automatically executes the permitted tool, updates status to `COMPLETED`, and appends immutable audit records.
+- **Certified Security Test Suite:** Automated IDOR/BOLA, cross-tenant isolation, server-side RBAC, SSRF, and prompt-injection verification (`tests/security/phase3-security.mjs`).
+
 ---
 
 ## 📦 Project Structure

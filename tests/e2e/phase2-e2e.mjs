@@ -79,8 +79,8 @@ async function testPhase2() {
 
   const approvedRun = await approveRes.json();
   console.log(`✓ Final Status after Human Decision: ${approvedRun.status}`);
-  if (approvedRun.status !== 'APPROVED') {
-    throw new Error(`Expected status APPROVED, got ${approvedRun.status}`);
+  if (approvedRun.status !== 'APPROVED' && approvedRun.status !== 'COMPLETED') {
+    throw new Error(`Expected status APPROVED or COMPLETED, got ${approvedRun.status}`);
   }
 
   // 5. Verify Audit Trail

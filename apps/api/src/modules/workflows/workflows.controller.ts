@@ -72,14 +72,21 @@ export class WorkflowsController {
     return this.workflowsService.getRun(id, orgId);
   }
 
+  @Get('tools')
+  @Roles(Role.VIEWER)
+  async getTools() {
+    return this.workflowsService.getTools();
+  }
+
   @Post('runs/:id/approve')
   @Roles(Role.MANAGER)
   async approveRun(
     @Param('id') id: string,
     @CurrentOrgId() orgId: string,
     @CurrentUser('id') userId: string,
+    @Body('comment') comment?: string,
   ) {
-    return this.workflowsService.approveRun(id, orgId, userId);
+    return this.workflowsService.approveRun(id, orgId, userId, comment);
   }
 
   @Post('runs/:id/reject')
